@@ -1,0 +1,8 @@
+modprobe -i intel_ipts
+modprobe -i mei_hdcp
+modprobe -i mei_me
+modprobe -i mei
+modprobe -i cfg80211
+modprobe -i mwifiex_pcie
+modprobe -i mwifiex
+#modprobe -i mwlwifi

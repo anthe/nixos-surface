@@ -1,0 +1,9 @@
+[submodule "libwacom-surface"]
+	path = libwacom-surface
+	url = https://github.com/qzed/libwacom-surface
+[submodule "linux-surface-kernel-configs"]
+	path = linux-surface-kernel-configs
+	url = https://github.com/qzed/linux-surface-kernel-configs
+[submodule "linux-surface"]
+	path = linux-surface
+	url = https://github.com/qzed/linux-surface
