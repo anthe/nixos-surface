@@ -1,0 +1,1 @@
+add nixos-surface/surface.nix to your imports in configuration.nix
