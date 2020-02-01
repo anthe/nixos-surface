@@ -7,3 +7,6 @@
 [submodule "linux-surface"]
 	path = linux-surface
 	url = https://github.com/qzed/linux-surface
+[submodule "kernel-configs"]
+	path = kernel-configs
+	url = https://github.com/linux-surface/kernel-configs

@@ -1,26 +1,52 @@
 {config, lib, pkgs, ... }:
 { 
   nixpkgs.overlays = [(self: super: {
-    libwacom = super.callPackage ./surface_libwacom.nix {};
-    surface_firmware = super.callPackage ./surface_firmware.nix {};
-    surface_kernel = super.linuxPackages_latest.extend( self: (ksuper: {
+    libwacom = super.callPackage ./surface-libwacom.nix {};
+    surface-control = super.callPackages ./surface-control.nix {};
+    surface-dtx-daemon = super.callPackages ./surface-dtx-daemon.nix {};
+    surface_firmware = super.callPackage ./surface-firmware.nix {};
+    surface_kernel = super.linuxPackages_4_19.extend( self: (ksuper: {
       kernel = ksuper.kernel.override {
         kernelPatches = [
-          { patch = linux-surface/patches/5.3/0001-surface-acpi.patch; name = "surface-acpi"; }
-          { patch = linux-surface/patches/5.3/0002-buttons.patch; name = "buttons"; }
-          { patch = linux-surface/patches/5.3/0003-surfacebook2-dgpu.patch; name = "surfacebook2-dgpu"; }
-          { patch = linux-surface/patches/5.3/0004-hid.patch; name = "hid"; }
-          { patch = linux-surface/patches/5.3/0005-surface3-power.patch; name = "surface3-power"; }
-          { patch = linux-surface/patches/5.3/0006-surface-lte.patch; name = "surface-lte"; }
-          { patch = linux-surface/patches/5.3/0007-wifi.patch; name = "wifi"; }
-          { patch = linux-surface/patches/5.3/0008-legacy-i915.patch; name = "legacy-i915"; }
-          { patch = linux-surface/patches/5.3/0009-ipts.patch; name = "ipts"; }
-          { patch = linux-surface/patches/5.3/0010-ioremap_uc.patch; name = "ioremap_uc"; }
+          { patch = linux-surface/patches/4.19/0001-surface3-power.patch; name = "1"; }
+          { patch = linux-surface/patches/4.19/0002-surface3-spi.patch; name = "2"; }
+          { patch = linux-surface/patches/4.19/0003-surface3-oemb.patch; name = "3"; }
+          { patch = linux-surface/patches/4.19/0004-surface-buttons.patch; name = "4"; }
+          { patch = linux-surface/patches/4.19/0005-surface-sam.patch; name = "5"; }
+          { patch = linux-surface/patches/4.19/0006-suspend.patch; name = "6"; }
+          { patch = linux-surface/patches/4.19/0007-ipts.patch; name = "7"; }
+          { patch = linux-surface/patches/4.19/0008-surface-lte.patch; name = "8"; }
+          { patch = linux-surface/patches/4.19/0009-ioremap_uc.patch; name = "9"; }
+          { patch = linux-surface/patches/4.19/0010-wifi.patch; name = "10"; }
         ];
-        extraConfig = (builtins.readFile ./surface_nixos.config);
+        extraConfig = ''
+          SERIAL_DEV_BUS y
+          SERIAL_DEV_CTRL_TTYPORT y
+          INTEL_IPTS m
+          INTEL_IPTS_SURFACE m
+          SURFACE_SAM m
+          SURFACE_SAM_SSH m
+          SURFACE_SAM_SSH_DEBUG_DEVICE y
+          SURFACE_SAM_SAN m
+          SURFACE_SAM_VHF m
+          SURFACE_SAM_DTX m
+          SURFACE_SAM_HPS m
+          SURFACE_SAM_SID m
+          SURFACE_SAM_SID_GPELID m
+          SURFACE_SAM_SID_PERFMODE m
+          SURFACE_SAM_SID_VHF m
+          SURFACE_SAM_SID_POWER m
+          INPUT_SOC_BUTTON_ARRAY m
+          SURFACE_3_POWER_OPREGION m
+          SURFACE_3_BUTTON m
+          SURFACE_3_POWER_OPREGION m
+          SURFACE_PRO3_BUTTON m
+        '';
       };
     }));
   })];
+
+  environment.systemPackages = [ pkgs.surface-control ];
 
   hardware.firmware = [ pkgs.surface_firmware ];
 
@@ -29,14 +55,17 @@
     #blacklistedKernelModules = [ "surfacepro3_button" ];
     kernelPackages = pkgs.surface_kernel;
     #extraModulePackages = [ pkgs.surface_kernel.bbswitch ];
-    extraModprobeConfig = (builtins.readFile ./linux-surface/root/etc/modprobe.d/snd-hda-intel.conf) + (builtins.readFile ./linux-surface/root/etc/modprobe.d/soc-button-array.conf);
+    extraModprobeConfig = (builtins.readFile ./linux-surface/root/etc/modprobe.d/ath10k.conf);
     initrd = {
       kernelModules = [ "hid" "hid_sensor_hub" "i2c_hid" "hid_generic" "usbhid" "hid_multitouch" "intel_ipts" "surface_acpi" ];
       availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
     };
   };
 
-  services.udev.packages = [ pkgs.surface_firmware pkgs.libwacom ];
+  services.udev.packages = [ pkgs.surface_firmware pkgs.libwacom pkgs.surface-dtx-daemon ];
+  services.dbus.packages = [ pkgs.surface-dtx-daemon ];
+  systemd.packages = [ pkgs.surface-dtx-daemon ];
+
 
   services.xserver.videoDrivers = [ "intel" ];
   #services.xserver.videoDrivers = [ "nouveau" ];
@@ -65,17 +94,26 @@
  
   networking.networkmanager = {
     enable = true;
-    #packages = [ "ifupdown" "keyfile" "ofono" ];
-    wifi = {
-      scanRandMacAddress = false;
-      powersave = true;
-    };
+    extraConfig = (builtins.readFile ./linux-surface/root/etc/NetworkManager/conf.d/99-surface.conf);
   };
 
-  environment.etc = { "systemd/sleep.conf".text = "SuspendState=freeze\n"; };
+  #environment.etc = { "systemd/sleep.conf".text = "SuspendState=freeze\n"; };
 
   powerManagement = {
     enable = true;
+    #acpitool -W 2 >2 /dev/null
+    powerUpCommands = ''
+      source /etc/profile
+      if ps cax | grep bluetoothd && ! bluetoothctl info; then
+        bluetoothctl power off
+      fi
+    '';
+    resumeCommands = ''
+      source /etc/profile
+      if ps cax | grep bluetoothd; then
+        bluetoothctl power on
+      fi
+    '';
   };
 
   services.acpid = {
@@ -85,26 +123,4 @@
     };
   };
 
-  powerManagement.powerUpCommands = ''
-    source /etc/profile
-    echo 1 > /sys/bus/pci/rescan
-    acpitool -W 2 >2 /dev/null
-  '';
-
-  powerManagement.powerDownCommands = ''
-    source /etc/profile
-    systemctl stop network-manager.service;
-  '' +
-    (builtins.readFile ./remove_modules); 
-
-  powerManagement.resumeCommands = ''
-    source /etc/profile
-  '' +
-  (builtins.readFile ./remove_modules) +
-  (builtins.readFile ./insert_modules) + 
-  ''
-    echo 1 > /sys/bus/pci/rescan
-    systemctl start network-manager.service;
-    acpitool -W 2 >2 /dev/null
-  '';
 }
