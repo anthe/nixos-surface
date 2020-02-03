@@ -1,6 +1,7 @@
 {config, lib, pkgs, ... }:
 { 
   nixpkgs.overlays = [(self: super: {
+    libinput = super.callPackage ./libinput-1.15.0.nix {};
     libwacom = super.callPackage ./surface-libwacom.nix {};
     surface-control = super.callPackages ./surface-control.nix {};
     surface-dtx-daemon = super.callPackages ./surface-dtx-daemon.nix {};
@@ -46,13 +47,11 @@
     }));
   })];
 
-  environment.systemPackages = [ pkgs.surface-control ];
-
+  environment.systemPackages = [ pkgs.surface-control pkgs.libinput ];
   hardware.firmware = [ pkgs.surface_firmware ];
 
   boot = {
     blacklistedKernelModules = [ "surfacepro3_button" "nouveau" ];
-    #blacklistedKernelModules = [ "surfacepro3_button" ];
     kernelPackages = pkgs.surface_kernel;
     #extraModulePackages = [ pkgs.surface_kernel.bbswitch ];
     extraModprobeConfig = (builtins.readFile ./linux-surface/root/etc/modprobe.d/ath10k.conf);
@@ -66,6 +65,7 @@
   services.dbus.packages = [ pkgs.surface-dtx-daemon ];
   systemd.packages = [ pkgs.surface-dtx-daemon ];
 
+  systemd.services.surface-dtx-daemon.path = [ pkgs.surface-dtx-daemon ];
 
   services.xserver.videoDrivers = [ "intel" ];
   #services.xserver.videoDrivers = [ "nouveau" ];
