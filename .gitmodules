@@ -1,15 +1,9 @@
 [submodule "libwacom-surface"]
 	path = libwacom-surface
-	url = https://github.com/qzed/libwacom-surface
-[submodule "linux-surface-kernel-configs"]
-	path = linux-surface-kernel-configs
-	url = https://github.com/qzed/linux-surface-kernel-configs
+	url = https://github.com/linux-surface/libwacom-surface
 [submodule "linux-surface"]
 	path = linux-surface
-	url = https://github.com/qzed/linux-surface
-[submodule "kernel-configs"]
-	path = kernel-configs
-	url = https://github.com/linux-surface/kernel-configs
+	url = https://github.com/linux-surface/linux-surface
 [submodule "surface-ipts-firmware"]
 	path = surface-ipts-firmware
 	url = https://github.com/linux-surface/surface-ipts-firmware

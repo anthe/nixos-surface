@@ -1,1 +1,27 @@
 add nixos-surface/surface.nix to your imports in configuration.nix
+
+Example surface-dtx-daemon configuration:
+  services.surface-dtx-daemon = {
+    enable = true;
+    attach = ''
+      #!/usr/bin/env bash
+      source /etc/profile
+      fsck -y /dev/disk/by-uuid/l2v7ne76-7efa-4236-a096-108xb7ck82b
+      mount /home/.card
+    '';
+    detach = ''
+      #!/usr/bin/env bash
+      source /etc/profile
+      for usb_dev in /dev/disk/by-id/usb-*
+       do
+          dev=$(readlink -f $usb_dev)
+          mount -l | grep -q "^$dev\s" && umount "$dev"
+       done
+      umount -A /dev/disk/by-uuid/l2v7ne76-7efa-4236-a096-108xb7ck82bf
+      for name in $(sudo -u user VBoxManage list runningvms | cut -d " " -f 2);
+        do
+          sudo -u user VBoxManage controlvm $name savestate
+        done
+      exit $EXIT_DETACH_COMMENCE
+    '';
+  };
