@@ -1,5 +1,7 @@
 add nixos-surface/surface.nix to your imports in configuration.nix
 
+try using cachix to skip building the kernel: cachix use nixos-surface
+
 Example surface-dtx-daemon configuration:
   services.surface-dtx-daemon = {
     enable = true;
