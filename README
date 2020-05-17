@@ -1,6 +1,14 @@
-add nixos-surface/surface.nix to your imports in configuration.nix
+Add nixos-surface/surface.nix to your imports in configuration.nix:
 
-try using cachix to skip building the kernel: cachix use nixos-surface
+imports =
+  [
+  ...
+  ./surface-nixos/surface.nix
+  ];
+  
+surface-control.nix and surface-dtx-daemon.nix depend on nixos-20.03
+
+Try using cachix to skip building the kernel: cachix use nixos-surface
 
 Example surface-dtx-daemon configuration:
   services.surface-dtx-daemon = {
