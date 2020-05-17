@@ -1,0 +1,14 @@
+diff -Naur surface-dtx-daemon-0.1.4-3-orig/etc/systemd/surface-dtx-daemon.service surface-dtx-daemon-0.1.4-3/etc/systemd/surface-dtx-daemon.service
+--- surface-dtx-daemon-0.1.4-3-orig/etc/systemd/surface-dtx-daemon.service	2020-05-16 21:45:22.717555461 -0700
++++ surface-dtx-daemon-0.1.4-3/etc/systemd/surface-dtx-daemon.service	2020-05-16 21:45:46.409305340 -0700
+@@ -3,10 +3,3 @@
+ Documentation=https://github.com/linux-surface/surface-dtx-daemon
+ After=dev-surface_dtx.device
+ Wants=dev-surface_dtx.device
+-
+-[Service]
+-Type=simple
+-ExecStart=/usr/bin/surface-dtx-daemon
+-
+-[Install]
+-WantedBy=multi-user.target

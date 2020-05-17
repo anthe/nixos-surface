@@ -1,5 +1,9 @@
 {config, lib, pkgs, ... }:
 { 
+  imports = [
+    ./surface-dtx-daemon-options.nix
+  ];
+
   nixpkgs.overlays = [(self: super: {
     libinput = super.callPackage ./libinput-1.15.0.nix {};
     libwacom = super.callPackage ./surface-libwacom.nix {};
@@ -21,10 +25,10 @@
           { patch = linux-surface/patches/4.19/0010-wifi.patch; name = "10"; }
         ];
         extraConfig = ''
-          SERIAL_DEV_BUS y
-          SERIAL_DEV_CTRL_TTYPORT y
           INTEL_IPTS m
           INTEL_IPTS_SURFACE m
+          SERIAL_DEV_BUS y
+          SERIAL_DEV_CTRL_TTYPORT y
           SURFACE_SAM m
           SURFACE_SAM_SSH m
           SURFACE_SAM_SSH_DEBUG_DEVICE y
@@ -47,14 +51,12 @@
     }));
   })];
 
-  environment.systemPackages = [ pkgs.surface-control pkgs.libinput ];
+  environment.systemPackages = [ pkgs.libinput ];
   hardware.firmware = [ pkgs.surface_firmware ];
 
   boot = {
     blacklistedKernelModules = [ "surfacepro3_button" "nouveau" ];
     kernelPackages = pkgs.surface_kernel;
-    #extraModulePackages = [ pkgs.surface_kernel.bbswitch ];
-    extraModprobeConfig = (builtins.readFile ./linux-surface/root/etc/modprobe.d/ath10k.conf);
     initrd = {
       kernelModules = [ "hid" "hid_sensor_hub" "i2c_hid" "hid_generic" "usbhid" "hid_multitouch" "intel_ipts" "surface_acpi" ];
       availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
@@ -62,10 +64,10 @@
   };
 
   services.udev.packages = [ pkgs.surface_firmware pkgs.libwacom pkgs.surface-dtx-daemon ];
-  services.dbus.packages = [ pkgs.surface-dtx-daemon ];
-  systemd.packages = [ pkgs.surface-dtx-daemon ];
 
-  systemd.services.surface-dtx-daemon.path = [ pkgs.surface-dtx-daemon ];
+  services.surface-dtx-daemon = {
+    enable = true;
+  };
 
   services.xserver.videoDrivers = [ "intel" ];
   #services.xserver.videoDrivers = [ "nouveau" ];
@@ -75,7 +77,7 @@
   # lshw -C display does detect the graphics card
   # X loads nvidia, then unloads it due to GLX error, this is maybe the best place to start
   #hardware.bumblebee = {
-    #enable = false;
+    #enable = true;
     #driver = "nvidia";
     #pmMethod = "bbswitch";
   #};
@@ -92,13 +94,6 @@
   #  };
   #};
  
-  networking.networkmanager = {
-    enable = true;
-    extraConfig = (builtins.readFile ./linux-surface/root/etc/NetworkManager/conf.d/99-surface.conf);
-  };
-
-  #environment.etc = { "systemd/sleep.conf".text = "SuspendState=freeze\n"; };
-
   powerManagement = {
     enable = true;
     #acpitool -W 2 >2 /dev/null
@@ -108,19 +103,17 @@
         bluetoothctl power off
       fi
     '';
+    powerDownCommands = ''
+      source /etc/profile
+      modprobe -r ipts_surface
+    '';
     resumeCommands = ''
       source /etc/profile
       if ps cax | grep bluetoothd; then
         bluetoothctl power on
       fi
+      modprobe ipts_surface
     '';
-  };
-
-  services.acpid = {
-    enable = true;
-    handlers = {
-      lid = { action = ""; event = "button/lid.*"; };
-    };
   };
 
 }

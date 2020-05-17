@@ -1,13 +1,13 @@
 {stdenv, fetchurl, rustPlatform, pkgconfig, dbus}:
 rustPlatform.buildRustPackage rec {
   name = "surface-dtx-daemon-${version}";
-  version = "0.1.4";
+  version = "0.1.4-3";
   src = fetchurl {
     url = "https://github.com/linux-surface/surface-dtx-daemon/archive/v${version}.tar.gz";
-    sha256 = "1h4k8js6qwdbj4y2xqiayc45jiym8zmh1l6wl85nq3i2zls3xb11";
+    sha256 = "1qn85ywk069chw0w8ygvxfl8b0i94qybhhf1k144hdb4ykhp33mw";
   };
 
-  patches = [ ./path.patch ];
+  patches = [ ./service.patch ];
 
   buildInputs = [ pkgconfig dbus ];
 
@@ -22,5 +22,8 @@ rustPlatform.buildRustPackage rec {
 
     mkdir -p $out/etc/dbus-1/system.d
     cp etc/dbus/org.surface.dtx.conf $out/etc/dbus-1/system.d/
+
+    mkdir -p $out/etc/dtx
+    cp etc/dtx/*.conf $out/etc/dtx/
   '';
 }

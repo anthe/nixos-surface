@@ -2,7 +2,7 @@
 stdenv.mkDerivation rec {
   name = "surface_firmware";
 
-  src = ./linux-surface;
+  src = ./surface-ipts-firmware;
 
   buildPhase = "";
 

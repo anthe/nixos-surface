@@ -1,13 +1,11 @@
-{stdenv, fetchgit, glib, pkgconfig, udev, libgudev, meson, libtool, libxml2, ninja, doxygen}:
+{stdenv, fetchurl, glib, pkgconfig, udev, libgudev, meson, libtool, libxml2, ninja, doxygen}:
 stdenv.mkDerivation rec {
   name = "libwacom-surface-${version}";
-  version = "0.32";
+  version = "1.3";
 
-  src = fetchgit {
-    url = "https://github.com/linux-surface/libwacom";
-    rev = "3eae724987ea38c0613d4bdfdbeafccf518448d6";
-    sha256 = "065k98rj7x7cxgn7rfjj4ds29nqj97hrqqwfm5d65kbzpr776j1i";
-
+  src = fetchurl {
+    url = "https://github.com/linux-surface/libwacom/archive/libwacom-${version}.tar.gz";
+    sha256 = "0ibq7w5922mjkbhkxzyvrr9mdz8j3kr0v5l3q8ax600a158l7ra3";
   };
 
   nativeBuildInputs = [ pkgconfig meson doxygen libtool libxml2 ninja libtool ];
