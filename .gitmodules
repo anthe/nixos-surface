@@ -10,3 +10,6 @@
 [submodule "kernel-configs"]
 	path = kernel-configs
 	url = https://github.com/linux-surface/kernel-configs
+[submodule "surface-ipts-firmware"]
+	path = surface-ipts-firmware
+	url = https://github.com/linux-surface/surface-ipts-firmware
