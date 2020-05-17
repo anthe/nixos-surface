@@ -7,8 +7,8 @@
   nixpkgs.overlays = [(self: super: {
     libinput = super.callPackage ./libinput-1.15.0.nix {};
     libwacom = super.callPackage ./surface-libwacom.nix {};
-    surface-control = super.callPackages ./surface-control.nix {};
-    surface-dtx-daemon = super.callPackages ./surface-dtx-daemon.nix {};
+    surface-control = super.callPackage ./surface-control.nix {};
+    surface-dtx-daemon = super.callPackage ./surface-dtx-daemon.nix {};
     surface_firmware = super.callPackage ./surface-firmware.nix {};
     surface_kernel = super.linuxPackages_4_19.extend( self: (ksuper: {
       kernel = ksuper.kernel.override {
