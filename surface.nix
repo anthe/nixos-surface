@@ -23,6 +23,7 @@
           { patch = linux-surface/patches/4.19/0008-surface-lte.patch; name = "8"; }
           { patch = linux-surface/patches/4.19/0009-ioremap_uc.patch; name = "9"; }
           { patch = linux-surface/patches/4.19/0010-wifi.patch; name = "10"; }
+          { patch = ./export_kernel_fpu_functions_4_14.patch; name = "11"; }
         ];
         extraConfig = ''
           INTEL_IPTS m
@@ -58,9 +59,11 @@
     blacklistedKernelModules = [ "surfacepro3_button" "nouveau" ];
     kernelPackages = pkgs.surface_kernel;
     initrd = {
-      kernelModules = [ "hid" "hid_sensor_hub" "i2c_hid" "hid_generic" "usbhid" "hid_multitouch" "intel_ipts" "surface_acpi" ];
-      availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
+      kernelModules = [ "hid" "hid_sensor_hub" "i2c_hid" "hid_generic" "usbhid" "hid_multitouch" "intel_ipts" "surface_acpi" "zfs" ];
+      availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" "zfs" ];
+      supportedFilesystems = [ "zfs" ];
     };
+    extraModulePackages = with config.boot.kernelPackages; [ zfs ];
   };
 
   services.udev.packages = [ pkgs.surface_firmware pkgs.libwacom pkgs.surface-dtx-daemon ];
