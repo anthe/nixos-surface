@@ -1,3 +1,10 @@
+This work is obsolete and no longer maintained. Instead, use https://github.com/NixOS/nixos-hardware/tree/master/microsoft/surface
+
+
+
+
+
+
 Add nixos-surface/surface.nix to your imports in configuration.nix:
 
 imports =
